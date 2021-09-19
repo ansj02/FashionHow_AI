@@ -25,7 +25,7 @@ class mevac():
         dia_index_list, dia_code_list, dia_data_list, image_list, dia_tag_list = get_data_list('train')
         dia_emb_list = get_embedding_data(dia_data_list, self.sentence_len, self.emb_size, self.embedding_model)
 
-        train_querySet, train_storySet, train_imageSet = new_get_train_dataSet(dia_index_list, dia_code_list,
+        train_querySet, train_storySet, train_imageSet = get_train_dataSet(dia_index_list, dia_code_list,
                                                                                dia_emb_list,
                                                                                image_list, dia_tag_list,
                                                                                self.story_size, self.sentence_len,
@@ -98,7 +98,8 @@ class mevac():
             batch_imageSet = embImgSet[i * self.batch_size:(i + 1) * self.batch_size]
             batch_imageSet = torch.tensor(batch_imageSet)
 
-            for _ in range(self.epoch):
+            print(i * self.batch_size, '/', num_data)
+            for epi in range(self.epoch):
                 dia_res, img_res = dec_model(batch_storySet, batch_querySet, batch_imageSet)
                 dia_res = dia_res.reshape((self.batch_size, self.res_size))
                 loss = (torch.sum((img_res - dia_res) ** 2) + (
@@ -108,14 +109,15 @@ class mevac():
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-                print(loss)
+                print('epoch : %d' % (epi + 1), '/', self.epoch)
+                print('loss = %f' % loss)
         torch.save(dec_model.state_dict(), self.path+'/model_file/dec_model_state_dict')
 
     def test_loss(self):
         dia_index_list, dia_code_list, dia_data_list, image_list, dia_tag_list = get_data_list('test')
         dia_emb_list = get_embedding_data(dia_data_list, self.sentence_len, self.emb_size, self.embedding_model)
 
-        test_querySet, test_storySet, test_imageSet = new_get_test_dataSet(dia_index_list, dia_code_list, dia_emb_list,
+        test_querySet, test_storySet, test_imageSet = get_test_dataSet(dia_index_list, dia_code_list, dia_emb_list,
                                                                            image_list, self.story_size,
                                                                            self.sentence_len, self.emb_size)
         num_data = len(test_querySet)
@@ -175,7 +177,7 @@ class mevac():
                     score = score - 2
                 else:
                     score = score - 3
-        print(score)
+        print('score = ', score, '/', num_data*3)
 
     def predict(self):
         loss1, loss2, loss3, num_data = self.test_loss()

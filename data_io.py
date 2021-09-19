@@ -213,46 +213,7 @@ def make_img_metaData_file(embedding_model, emb_size, meta_data_path=mdata):
                            'character_emb': cha_data_list})
         df.to_csv('model_file/metaDataSet.csv')
 
-def get_train_dataSet(dia_index_list, dia_code_list, dia_emb_list, image_list, dia_tag_list):
-    idx = 0
-    train_dataSet = []
-    while idx<len(dia_index_list):
-        story = []
-        story_code = []
-        query = []
-        image = [None, None, None, None]
-        get_US = True
-        while 'CLOSING' not in dia_tag_list[idx]:
-            if query == [] and dia_code_list[idx]=='US':
-                query.append(dia_emb_list[idx])
-            elif 'EXP' in dia_tag_list[idx] or 'SUGGEST' in dia_tag_list[idx] or 'ASK' in dia_tag_list[idx]:
-                story.append(dia_emb_list[idx])
-                story_code.append(dia_code_list[idx])
-                get_US=True
-            elif 'CONFIRM' in dia_tag_list[idx]:
-                get_US=False
-            elif dia_code_list[idx] == 'US' and get_US:
-                story.append(dia_emb_list[idx])
-                story_code.append(dia_code_list[idx])
-            elif image_list[idx] != []:
-                ad = 0
-                while 'USER' not in dia_tag_list[idx+ad] and 'CLOSING' not in dia_tag_list[idx+ad]:
-                    ad = ad+1
-                if 'USERSUCCESS' in dia_tag_list[idx+ad]:
-                    for img in image_list[idx]:
-                        #if 'SE' in img: image[3] = img
-                        cl = img[0:2]
-                        if cl=='SE': image[3] = img
-                        elif cl in ['SK', 'PT', 'OP']: image[2] = img
-                        elif cl in ['KN', 'SW', 'SH', 'BL']: image[1] = img
-                        else: image[0] = img
-            idx = idx+1
-        if image != [None, None, None, None]:
-            train_dataSet.append([query, story_code, story, image])
-        idx = idx+1
-    return train_dataSet
-
-def new_get_train_dataSet(dia_index_list, dia_code_list, dia_emb_list, image_list, dia_tag_list, story_size, sentence_size, emb_size):
+def get_train_dataSet(dia_index_list, dia_code_list, dia_emb_list, image_list, dia_tag_list, story_size, sentence_size, emb_size):
     idx = 0
     train_querySet = []
     train_storySet = []
@@ -295,68 +256,7 @@ def new_get_train_dataSet(dia_index_list, dia_code_list, dia_emb_list, image_lis
         idx = idx+1
     return train_querySet, train_storySet, train_imageSet
 
-def get_test_dataSet(dia_index_list, dia_code_list, dia_emb_list, image_list):
-    num_data = len(dia_index_list)
-    test_dataSet = []
-    story = []
-    story_code = []
-    query = []
-    imageSet1 = [None, None, None, None]
-    imageSet2 = [None, None, None, None]
-    imageSet3 = [None, None, None, None]
-    fir_US = False
-    for idx in range(num_data):
-        story_code.append(dia_code_list[idx])
-        if "R" in dia_code_list[idx]:
-            if dia_code_list[idx] == 'R1':
-                for img in image_list[idx]:
-                    cl = img[0:2]
-                    if cl == 'SE':
-                        imageSet1[3] = img
-                    elif cl in ['SK', 'PT', 'OP']:
-                        imageSet1[2] = img
-                    elif cl in ['KN', 'SW', 'SH', 'BL']:
-                        imageSet1[1] = img
-                    else:
-                        imageSet1[0] = img
-            elif dia_code_list[idx] == 'R2':
-                for img in image_list[idx]:
-                    cl = img[0:2]
-                    if cl == 'SE':
-                        imageSet2[3] = img
-                    elif cl in ['SK', 'PT', 'OP']:
-                        imageSet2[2] = img
-                    elif cl in ['KN', 'SW', 'SH', 'BL']:
-                        imageSet2[1] = img
-                    else:
-                        imageSet2[0] = img
-            elif dia_code_list[idx] == 'R3':
-                for img in image_list[idx]:
-                    cl = img[0:2]
-                    if cl == 'SE':
-                        imageSet3[3] = img
-                    elif cl in ['SK', 'PT', 'OP']:
-                        imageSet3[2] = img
-                    elif cl in ['KN', 'SW', 'SH', 'BL']:
-                        imageSet3[1] = img
-                    else:
-                        imageSet3[0] = img
-                test_dataSet.append([query, story_code, story, imageSet1, imageSet2, imageSet3])
-                story = []
-                story_code = []
-                query = []
-                imageSet1 = [None, None, None, None]
-                imageSet2 = [None, None, None, None]
-                imageSet3 = [None, None, None, None]
-                fir_US = False
-        elif not fir_US and dia_code_list[idx] == "US":
-            fir_US =True
-            query = dia_emb_list[idx]
-        else:
-            story.append(dia_emb_list[idx])
-    return test_dataSet
-
-def new_get_test_dataSet(dia_index_list, dia_code_list, dia_emb_list, image_list, story_size, sentence_size, emb_size):
+def get_test_dataSet(dia_index_list, dia_code_list, dia_emb_list, image_list, story_size, sentence_size, emb_size):
     num_data = len(dia_index_list)
     test_querySet = []
     test_storySet = []
