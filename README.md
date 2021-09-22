@@ -1,4 +1,4 @@
-"# FashionHow_AI" 
+# FashionHow_AI
 고객 대화 데이터에 맞는 패션 이미지 셋 추천을 위한 유사도 측정
 
 
